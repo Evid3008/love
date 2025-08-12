@@ -35,6 +35,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 ENV PLAYWRIGHT_BROWSERS_PATH=/app/.cache/ms-playwright
 RUN playwright install chromium --with-deps
 
+# Diagnostic: Check what was installed
+RUN echo "=== After playwright install ===" && \
+    ls -la /app/.cache/ms-playwright/ && \
+    find /app/.cache/ms-playwright -name "chrome" -type f -exec ls -la {} \; && \
+    echo "=== Environment variable ===" && \
+    echo "PLAYWRIGHT_BROWSERS_PATH=$PLAYWRIGHT_BROWSERS_PATH"
+
 # Copy application code
 COPY . .
 
@@ -44,11 +51,30 @@ RUN useradd -m -u 1000 botuser && chown -R botuser:botuser /app
 # Ensure botuser can access the browser cache
 RUN chown -R botuser:botuser /app/.cache
 
+# Diagnostic: Check permissions after chown
+RUN echo "=== After chown ===" && \
+    ls -la /app/.cache/ms-playwright/ && \
+    find /app/.cache/ms-playwright -name "chrome" -type f -exec ls -la {} \; && \
+    echo "=== botuser can access ===" && \
+    su botuser -c "ls -la /app/.cache/ms-playwright/" || echo "botuser cannot access"
+
 # Switch to non-root user
 USER botuser
 
+# Diagnostic: Check as botuser
+RUN echo "=== As botuser ===" && \
+    ls -la /app/.cache/ms-playwright/ && \
+    find /app/.cache/ms-playwright -name "chrome" -type f -exec ls -la {} \; && \
+    echo "=== Environment variable as botuser ===" && \
+    echo "PLAYWRIGHT_BROWSERS_PATH=$PLAYWRIGHT_BROWSERS_PATH"
+
 # Verify browser installation and install if needed
 RUN python verify_browser.py || python install_browser.py
+
+# Diagnostic: Final check
+RUN echo "=== Final check ===" && \
+    ls -la /app/.cache/ms-playwright/ && \
+    find /app/.cache/ms-playwright -name "chrome" -type f -exec ls -la {} \;
 
 # Expose port (if needed for webhooks)
 EXPOSE 8080
