@@ -38,8 +38,20 @@ async def _ensure_chromium_and_launch(
     user_agent: Optional[str] = None,
 ):
     """Original launcher without auto-install or locale/headers overrides."""
+    import os
     launch_args = args or []
-    browser = await p.chromium.launch(headless=headless, slow_mo=slow_mo, args=launch_args)
+    
+    # Use custom browser path if environment variable is set
+    executable_path = os.getenv('PLAYWRIGHT_BROWSERS_PATH')
+    if executable_path:
+        executable_path = os.path.join(executable_path, 'chromium-1091', 'chrome-linux', 'chrome')
+    
+    browser = await p.chromium.launch(
+        headless=headless, 
+        slow_mo=slow_mo, 
+        args=launch_args,
+        executable_path=executable_path if executable_path and os.path.exists(executable_path) else None
+    )
     context_kwargs: Dict[str, object] = {}
     if viewport:
         context_kwargs["viewport"] = viewport

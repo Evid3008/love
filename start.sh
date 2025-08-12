@@ -35,6 +35,7 @@ fi
 
 # Install Playwright browsers
 echo "🌐 Installing Playwright browsers..."
+export PLAYWRIGHT_BROWSERS_PATH=/app/.cache/ms-playwright
 playwright install chromium --with-deps
 
 # Clean up any existing artifacts

@@ -31,7 +31,8 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Playwright browsers as root (needed for system dependencies)
+# Install Playwright browsers in a shared location
+ENV PLAYWRIGHT_BROWSERS_PATH=/app/.cache/ms-playwright
 RUN playwright install chromium --with-deps
 
 # Copy application code
@@ -42,6 +43,9 @@ RUN useradd -m -u 1000 botuser && chown -R botuser:botuser /app
 
 # Switch to non-root user
 USER botuser
+
+# Verify browser installation
+RUN python verify_browser.py
 
 # Expose port (if needed for webhooks)
 EXPOSE 8080
