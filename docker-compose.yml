@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  netflix-bot:
+    build: .
+    container_name: netflix-cookie-bot
+    restart: unless-stopped
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+    volumes:
+      - ./logs:/app/logs
+      - ./temp:/app/temp
+    networks:
+      - bot-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('https://api.telegram.org/bot${BOT_TOKEN}/getMe')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: netflix-bot-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - netflix-bot
+    networks:
+      - bot-network
+    profiles:
+      - with-nginx
+
+networks:
+  bot-network:
+    driver: bridge
+
+volumes:
+  logs:
+  temp:

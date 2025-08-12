@@ -1,0 +1,16 @@
+# Core dependencies
+python-telegram-bot==20.7
+python-dotenv==1.0.0
+playwright==1.40.0
+requests==2.31.0
+deep-translator==1.11.4
+
+# Additional dependencies for better functionality
+aiohttp==3.9.1
+asyncio-throttle==1.0.2
+beautifulsoup4==4.12.2
+lxml==4.9.3
+urllib3==2.1.0
+certifi==2023.11.17
+charset-normalizer==3.3.2
+idna==3.6 

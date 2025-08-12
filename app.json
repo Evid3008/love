@@ -1,0 +1,26 @@
+{
+  "name": "Netflix Cookie Bot",
+  "description": "A powerful Telegram bot for processing Netflix cookies and extracting account details",
+  "repository": "https://github.com/yourusername/NF-Filter",
+  "logo": "https://raw.githubusercontent.com/yourusername/NF-Filter/main/logo.png",
+  "keywords": ["python", "telegram", "bot", "netflix", "cookies"],
+  "env": {
+    "BOT_TOKEN": {
+      "description": "Your Telegram bot token from @BotFather",
+      "required": true
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "addons": [],
+  "stack": "heroku-22"
+}
