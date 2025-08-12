@@ -22,6 +22,9 @@ A powerful Telegram bot for processing Netflix cookies and extracting account de
 ### Heroku
 [![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
+### Koyeb
+[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=git&repository=github.com/Evid3008/love&branch=main&name=netflix-cookie-bot)
+
 ## 📋 Prerequisites
 
 - Python 3.8+
@@ -90,6 +93,19 @@ A powerful Telegram bot for processing Netflix cookies and extracting account de
 4. Connect GitHub repository
 5. Add environment variable: `BOT_TOKEN=your_bot_token`
 6. Deploy!
+
+### Koyeb Deployment
+
+1. Fork this repository
+2. Go to [Koyeb](https://app.koyeb.com)
+3. Click "Create App" → "Deploy from GitHub"
+4. Select your forked repository
+5. Configure:
+   - **Name**: netflix-cookie-bot
+   - **Environment**: Docker
+   - **Port**: 8080
+6. Add environment variable: `BOT_TOKEN=your_bot_token`
+7. Deploy!
 
 ### Docker Deployment
 
