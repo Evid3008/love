@@ -39,12 +39,49 @@ async def _ensure_chromium_and_launch(
 ):
     """Original launcher without auto-install or locale/headers overrides."""
     import os
+    import glob
     launch_args = args or []
     
-    # Use custom browser path if environment variable is set
-    executable_path = os.getenv('PLAYWRIGHT_BROWSERS_PATH')
-    if executable_path:
-        executable_path = os.path.join(executable_path, 'chromium-1091', 'chrome-linux', 'chrome')
+    # Try multiple browser paths
+    executable_path = None
+    
+    # 1. Check environment variable first
+    env_path = os.getenv('PLAYWRIGHT_BROWSERS_PATH')
+    if env_path:
+        possible_paths = [
+            os.path.join(env_path, 'chromium-1091', 'chrome-linux', 'chrome'),
+            os.path.join(env_path, 'chromium-*', 'chrome-linux', 'chrome'),
+        ]
+        for path in possible_paths:
+            if '*' in path:
+                # Handle wildcard paths
+                matches = glob.glob(path)
+                if matches:
+                    executable_path = matches[0]
+                    break
+            elif os.path.exists(path):
+                executable_path = path
+                break
+    
+    # 2. If not found, try default locations
+    if not executable_path:
+        default_paths = [
+            '/app/.cache/ms-playwright/chromium-1091/chrome-linux/chrome',
+            '/app/.cache/ms-playwright/chromium-*/chrome-linux/chrome',
+            '/home/botuser/.cache/ms-playwright/chromium-1091/chrome-linux/chrome',
+            '/home/botuser/.cache/ms-playwright/chromium-*/chrome-linux/chrome',
+        ]
+        for path in default_paths:
+            if '*' in path:
+                matches = glob.glob(path)
+                if matches:
+                    executable_path = matches[0]
+                    break
+            elif os.path.exists(path):
+                executable_path = path
+                break
+    
+    logger.info(f"🔍 Using browser executable: {executable_path}")
     
     browser = await p.chromium.launch(
         headless=headless, 

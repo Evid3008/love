@@ -41,11 +41,14 @@ COPY . .
 # Create non-root user for security
 RUN useradd -m -u 1000 botuser && chown -R botuser:botuser /app
 
+# Ensure botuser can access the browser cache
+RUN chown -R botuser:botuser /app/.cache
+
 # Switch to non-root user
 USER botuser
 
-# Verify browser installation
-RUN python verify_browser.py
+# Verify browser installation and install if needed
+RUN python verify_browser.py || python install_browser.py
 
 # Expose port (if needed for webhooks)
 EXPOSE 8080
