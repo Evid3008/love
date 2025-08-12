@@ -14,6 +14,12 @@ import asyncio
 # Import bot token from config
 from config import BOT_TOKEN
 
+# Set Playwright browser path environment variable
+import os
+if not os.getenv('PLAYWRIGHT_BROWSERS_PATH'):
+    os.environ['PLAYWRIGHT_BROWSERS_PATH'] = '/app/.cache/ms-playwright'
+    print("🔧 Set PLAYWRIGHT_BROWSERS_PATH to /app/.cache/ms-playwright")
+
 # Configure logging - LIVE DEBUG MODE
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',

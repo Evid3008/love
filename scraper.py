@@ -42,11 +42,18 @@ async def _ensure_chromium_and_launch(
     import glob
     launch_args = args or []
     
+    # Set environment variable if not already set
+    if not os.getenv('PLAYWRIGHT_BROWSERS_PATH'):
+        os.environ['PLAYWRIGHT_BROWSERS_PATH'] = '/app/.cache/ms-playwright'
+        logger.info("🔧 Set PLAYWRIGHT_BROWSERS_PATH to /app/.cache/ms-playwright")
+    
     # Try multiple browser paths
     executable_path = None
     
     # 1. Check environment variable first
     env_path = os.getenv('PLAYWRIGHT_BROWSERS_PATH')
+    logger.info(f"🔍 Environment path: {env_path}")
+    
     if env_path:
         possible_paths = [
             os.path.join(env_path, 'chromium-1091', 'chrome-linux', 'chrome'),
@@ -58,13 +65,16 @@ async def _ensure_chromium_and_launch(
                 matches = glob.glob(path)
                 if matches:
                     executable_path = matches[0]
+                    logger.info(f"✅ Found browser via wildcard: {executable_path}")
                     break
             elif os.path.exists(path):
                 executable_path = path
+                logger.info(f"✅ Found browser via direct path: {executable_path}")
                 break
     
     # 2. If not found, try default locations
     if not executable_path:
+        logger.info("🔍 Trying default locations...")
         default_paths = [
             '/app/.cache/ms-playwright/chromium-1091/chrome-linux/chrome',
             '/app/.cache/ms-playwright/chromium-*/chrome-linux/chrome',
@@ -76,12 +86,31 @@ async def _ensure_chromium_and_launch(
                 matches = glob.glob(path)
                 if matches:
                     executable_path = matches[0]
+                    logger.info(f"✅ Found browser in default location: {executable_path}")
                     break
             elif os.path.exists(path):
                 executable_path = path
+                logger.info(f"✅ Found browser in default location: {executable_path}")
                 break
     
-    logger.info(f"🔍 Using browser executable: {executable_path}")
+    # 3. If still not found, try to find any chromium executable
+    if not executable_path:
+        logger.info("🔍 Searching for any chromium executable...")
+        search_paths = [
+            '/app/.cache/ms-playwright',
+            '/home/botuser/.cache/ms-playwright',
+            '/root/.cache/ms-playwright',
+        ]
+        for search_path in search_paths:
+            if os.path.exists(search_path):
+                chromium_pattern = os.path.join(search_path, '**', 'chrome')
+                matches = glob.glob(chromium_pattern, recursive=True)
+                if matches:
+                    executable_path = matches[0]
+                    logger.info(f"✅ Found browser via recursive search: {executable_path}")
+                    break
+    
+    logger.info(f"🔍 Final browser executable: {executable_path}")
     
     browser = await p.chromium.launch(
         headless=headless, 
