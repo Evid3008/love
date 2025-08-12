@@ -40,6 +40,7 @@ async def _ensure_chromium_and_launch(
     """Original launcher without auto-install or locale/headers overrides."""
     import os
     import glob
+    import subprocess
     launch_args = args or []
     
     # Set environment variable if not already set
@@ -110,7 +111,54 @@ async def _ensure_chromium_and_launch(
                     logger.info(f"✅ Found browser via recursive search: {executable_path}")
                     break
     
+    # 4. If still not found, force install at runtime
+    if not executable_path:
+        logger.warning("⚠️ Browser not found, attempting to install at runtime...")
+        try:
+            # Ensure the cache directory exists
+            cache_dir = '/app/.cache/ms-playwright'
+            os.makedirs(cache_dir, exist_ok=True)
+            
+            # Set environment variable for installation
+            env = os.environ.copy()
+            env['PLAYWRIGHT_BROWSERS_PATH'] = cache_dir
+            
+            # Install chromium
+            result = subprocess.run([
+                'playwright', 'install', 'chromium', '--with-deps'
+            ], env=env, capture_output=True, text=True, timeout=300)
+            
+            if result.returncode == 0:
+                logger.info("✅ Successfully installed browser at runtime")
+                # Try to find the newly installed browser
+                chromium_pattern = os.path.join(cache_dir, 'chromium-*', 'chrome-linux', 'chrome')
+                matches = glob.glob(chromium_pattern)
+                if matches:
+                    executable_path = matches[0]
+                    logger.info(f"✅ Found newly installed browser: {executable_path}")
+                else:
+                    logger.error("❌ Browser installed but not found in expected location")
+            else:
+                logger.error(f"❌ Failed to install browser: {result.stderr}")
+        except Exception as e:
+            logger.error(f"❌ Error during runtime installation: {e}")
+    
     logger.info(f"🔍 Final browser executable: {executable_path}")
+    
+    # Verify the executable exists and is executable
+    if executable_path and not os.path.exists(executable_path):
+        logger.error(f"❌ Executable path exists but file not found: {executable_path}")
+        executable_path = None
+    
+    if executable_path and not os.access(executable_path, os.X_OK):
+        logger.error(f"❌ Executable path exists but not executable: {executable_path}")
+        # Try to make it executable
+        try:
+            os.chmod(executable_path, 0o755)
+            logger.info(f"✅ Made executable: {executable_path}")
+        except Exception as e:
+            logger.error(f"❌ Failed to make executable: {e}")
+            executable_path = None
     
     browser = await p.chromium.launch(
         headless=headless, 

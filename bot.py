@@ -872,6 +872,11 @@ def main():
     """Start the bot"""
     # Clean artifacts at startup for server/GitHub hygiene
     _cleanup_artifacts(aggressive=True)
+    
+    # Add unique identifier to prevent conflicts
+    import uuid
+    instance_id = str(uuid.uuid4())[:8]
+    
     application = Application.builder().token(BOT_TOKEN).build()
     
     # Add only essential handlers
@@ -880,11 +885,21 @@ def main():
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     application.add_handler(CallbackQueryHandler(on_button))
     
-    # Start the bot
+    # Start the bot with unique identifier
     print("🚀 Netflix Cookie Bot - Unlimited Edition Starting...")
+    print(f"🆔 Instance ID: {instance_id}")
     print("✨ No limits, no buttons, no restrictions!")
     print("📝 Send Netflix cookies to get instant results!")
-    application.run_polling()
+    
+    try:
+        application.run_polling(
+            allowed_updates=Update.ALL_TYPES,
+            drop_pending_updates=True,  # Drop any pending updates to avoid conflicts
+            close_loop=False
+        )
+    except Exception as e:
+        logger.error(f"Bot startup error: {e}")
+        raise
     
 if __name__ == '__main__':
     main()
