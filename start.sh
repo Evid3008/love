@@ -33,11 +33,9 @@ if [ -f "requirements.txt" ]; then
     pip install --no-cache-dir -r requirements.txt
 fi
 
-# Install Playwright browsers if not already installed
-if ! playwright --version > /dev/null 2>&1; then
-    echo "🌐 Installing Playwright browsers..."
-    playwright install chromium --with-deps
-fi
+# Install Playwright browsers
+echo "🌐 Installing Playwright browsers..."
+playwright install chromium --with-deps
 
 # Clean up any existing artifacts
 echo "🧹 Cleaning up artifacts..."

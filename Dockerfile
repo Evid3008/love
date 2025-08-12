@@ -31,15 +31,15 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Playwright browsers
-RUN playwright install chromium --with-deps
-
 # Copy application code
 COPY . .
 
 # Create non-root user for security
 RUN useradd -m -u 1000 botuser && chown -R botuser:botuser /app
+
+# Install Playwright browsers as botuser
 USER botuser
+RUN playwright install chromium --with-deps
 
 # Expose port (if needed for webhooks)
 EXPOSE 8080

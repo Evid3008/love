@@ -223,6 +223,17 @@ In `bot.py`, you can modify:
    playwright install chromium
    ```
 
+3. **Playwright browser not found error**
+   ```bash
+   # Run the fix script
+   chmod +x fix_playwright.sh
+   ./fix_playwright.sh
+   
+   # Or manually fix:
+   rm -rf ~/.cache/ms-playwright
+   playwright install chromium --with-deps
+   ```
+
 3. **Memory issues on small servers**
    - Reduce `BATCH_SIZE` in bot.py
    - Use headless mode (already enabled)

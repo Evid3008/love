@@ -3,7 +3,7 @@ services:
     name: netflix-cookie-bot
     env: python
     plan: free
-    buildCommand: pip install -r requirements.txt && playwright install chromium
+    buildCommand: pip install -r requirements.txt && playwright install chromium --with-deps
     startCommand: python bot.py
     envVars:
       - key: BOT_TOKEN
